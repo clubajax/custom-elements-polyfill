@@ -2,7 +2,7 @@
 
 This package uses the shims from https://github.com/webcomponents/custom-elements
 and combines them into a single polyfill that can be added to your project with npm.
-This makes it more Webpack friendly, sinc Webpack does not play well with Bower.
+This makes it more Webpack friendly, since Webpack does not play well with Bower.
 
 ## Installation
 

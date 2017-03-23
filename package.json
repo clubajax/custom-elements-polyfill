@@ -23,8 +23,10 @@
     "url": "https://github.com/clubajax/custom-elements-polyfill/issues"
   },
   "homepage": "https://github.com/clubajax/custom-elements-polyfill#readme",
+  "dependencies": {
+    "@webcomponents/custom-elements": "github:webcomponents/custom-elements"
+  },
   "devDependencies": {
-    "@webcomponents/custom-elements": "github:webcomponents/custom-elements",
     "grunt": "^1.0.1",
     "uglify": "^0.1.5"
   }
