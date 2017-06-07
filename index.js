@@ -22,53 +22,110 @@ if(fns || fce){
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 function nativeShim() {
-(() => {
-'use strict';
-if (!window.customElements) return;
-const NativeHTMLElement = window.HTMLElement;
-const nativeDefine = window.customElements.define;
-const nativeGet = window.customElements.get;
-const tagnameByConstructor = new Map();
-const constructorByTagname = new Map();
-let browserConstruction = false;
-let userConstruction = false;
-window.HTMLElement = function() {
-if (!browserConstruction) {
-const tagname = tagnameByConstructor.get(this.constructor);
-const fakeClass = nativeGet.call(window.customElements, tagname);
-userConstruction = true;
-const instance = new (fakeClass)();
-return instance;
+	'use strict';
+
+	// Do nothing if `customElements` does not exist.
+	if (!window.customElements) return;
+
+	var NativeHTMLElement = window.HTMLElement;
+	var nativeDefine = window.customElements.define;
+	var nativeGet = window.customElements.get;
+
+	/**
+	 * Map of user-provided constructors to tag names.
+	 *
+	 * @type {Map<Function, string>}
+	 */
+	var tagnameByConstructor = new Map();
+
+	/**
+	 * Map of tag names to user-provided constructors.
+	 *
+	 * @type {Map<string, Function>}
+	 */
+	var constructorByTagname = new Map();
+
+
+	/**
+	 * Whether the constructors are being called by a browser process, ie parsing
+	 * or createElement.
+	 */
+	var browserConstruction = false;
+
+	/**
+	 * Whether the constructors are being called by a user-space process, ie
+	 * calling an element constructor.
+	 */
+	var userConstruction = false;
+
+	window.HTMLElement = function() {
+		if (!browserConstruction) {
+			var tagname = tagnameByConstructor.get(this.constructor);
+			var FakeClass = nativeGet.call(window.customElements, tagname);
+
+			// Make sure that the fake constructor doesn't call back to this constructor
+			userConstruction = true;
+			var instance = new (FakeClass)();
+			return instance;
+		}
+		// Else do nothing. This will be reached by ES5-style classes doing
+		// HTMLElement.call() during initialization
+		browserConstruction = false;
+	};
+	// By setting the patched HTMLElement's prototype property to the native
+	// HTMLElement's prototype we make sure that:
+	//     document.createElement('a') instanceof HTMLElement
+	// works because instanceof uses HTMLElement.prototype, which is on the
+	// ptototype chain of built-in elements.
+	window.HTMLElement.prototype = NativeHTMLElement.prototype;
+
+	var define = function (tagname, elementClass) {
+		var elementProto = elementClass.prototype;
+		var StandInElement = class extends NativeHTMLElement {
+			constructor() {
+				// Call the native HTMLElement constructor, this gives us the
+				// under-construction instance as `this`:
+				super();
+
+				// The prototype will be wrong up because the browser used our fake
+				// class, so fix it:
+				Object.setPrototypeOf(this, elementProto);
+
+				if (!userConstruction) {
+					// Make sure that user-defined constructor bottom's out to a do-nothing
+					// HTMLElement() call
+					browserConstruction = true;
+					// Call the user-defined constructor on our instance:
+					elementClass.call(this);
+				}
+				userConstruction = false;
+			}
+		};
+		var standInProto = StandInElement.prototype;
+		StandInElement.observedAttributes = elementClass.observedAttributes;
+		standInProto.connectedCallback = elementProto.connectedCallback;
+		standInProto.disconnectedCallback = elementProto.disconnectedCallback;
+		standInProto.attributeChangedCallback = elementProto.attributeChangedCallback;
+		standInProto.adoptedCallback = elementProto.adoptedCallback;
+
+		tagnameByConstructor.set(elementClass, tagname);
+		constructorByTagname.set(tagname, elementClass);
+		nativeDefine.call(window.customElements, tagname, StandInElement);
+	};
+
+	var get = function (tagname) { constructorByTagname.get(tagname); }
+
+	// Workaround for Safari bug where patching customElements can be lost, likely
+	// due to native wrapper garbage collection issue
+	Object.defineProperty(window, 'customElements',
+		{value: window.customElements, configurable: true, writable: true});
+	Object.defineProperty(window.customElements, 'define',
+		{value: define, configurable: true, writable: true});
+	Object.defineProperty(window.customElements, 'get',
+		{value: get, configurable: true, writable: true});
+
 }
-browserConstruction = false;
-};
-window.HTMLElement.prototype = NativeHTMLElement.prototype;
-window.customElements.define = (tagname, elementClass) => {
-const elementProto = elementClass.prototype;
-const StandInElement = class extends NativeHTMLElement {
-constructor() {
-super();
-Object.setPrototypeOf(this, elementProto);
-if (!userConstruction) {
-browserConstruction = true;
-elementClass.call(this);
-}
-userConstruction = false;
-}
-};
-const standInProto = StandInElement.prototype;
-StandInElement.observedAttributes = elementClass.observedAttributes;
-standInProto.connectedCallback = elementProto.connectedCallback;
-standInProto.disconnectedCallback = elementProto.disconnectedCallback;
-standInProto.attributeChangedCallback = elementProto.attributeChangedCallback;
-standInProto.adoptedCallback = elementProto.adoptedCallback;
-tagnameByConstructor.set(elementClass, tagname);
-constructorByTagname.set(tagname, elementClass);
-nativeDefine.call(window.customElements, tagname, StandInElement);
-};
-window.customElements.get = (tagname) => constructorByTagname.get(tagname);
-})();
-}
+
 function customElements() {
 (function(){
 'use strict';var g=new function(){};var aa=new Set("annotation-xml color-profile font-face font-face-src font-face-uri font-face-format font-face-name missing-glyph".split(" "));function k(b){var a=aa.has(b);b=/^[a-z][.0-9_a-z]*-[\-.0-9_a-z]*$/.test(b);return!a&&b}function l(b){var a=b.isConnected;if(void 0!==a)return a;for(;b&&!(b.__CE_isImportDocument||b instanceof Document);)b=b.parentNode||(window.ShadowRoot&&b instanceof ShadowRoot?b.host:void 0);return!(!b||!(b.__CE_isImportDocument||b instanceof Document))}
