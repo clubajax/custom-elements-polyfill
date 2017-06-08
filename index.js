@@ -306,4 +306,6 @@ Promise._immediateFn = fn;
 Promise._setUnhandledRejectionFn = function _setUnhandledRejectionFn(fn) {
 Promise._unhandledRejectionFn = fn;
 };
+console.log('Promise polyfill');
+window.Promise = Promise;
 }
