@@ -24,83 +24,47 @@ if(fns || fce){
 function nativeShim() {
 	'use strict';
 
-	// Do nothing if `customElements` does not exist.
-	if (!window.customElements) return;
+	var getStandInElement = function(elementProto, elementClass) {
+		eval(
+			'window.__getWCClass = function (elementProto, elementClass) {' +
+			'return class extends NativeHTMLElement {' +
+			'constructor() {' +
+			'super();' +
+			'Object.setPrototypeOf(this, elementProto);' +
+			'if (!userConstruction) {' +
+			'browserConstruction = true;' +
+			'elementClass.call(this);' +
+			'}' +
+			'userConstruction = false;' +
+			'}' +
+			'};' +
+			'}'
+		);
+		return window.__getWCClass(elementProto, elementClass);
+	};
 
 	var NativeHTMLElement = window.HTMLElement;
 	var nativeDefine = window.customElements.define;
 	var nativeGet = window.customElements.get;
-
-	/**
-	 * Map of user-provided constructors to tag names.
-	 *
-	 * @type {Map<Function, string>}
-	 */
 	var tagnameByConstructor = new Map();
-
-	/**
-	 * Map of tag names to user-provided constructors.
-	 *
-	 * @type {Map<string, Function>}
-	 */
 	var constructorByTagname = new Map();
-
-
-	/**
-	 * Whether the constructors are being called by a browser process, ie parsing
-	 * or createElement.
-	 */
 	var browserConstruction = false;
-
-	/**
-	 * Whether the constructors are being called by a user-space process, ie
-	 * calling an element constructor.
-	 */
 	var userConstruction = false;
 
 	window.HTMLElement = function() {
 		if (!browserConstruction) {
 			var tagname = tagnameByConstructor.get(this.constructor);
 			var FakeClass = nativeGet.call(window.customElements, tagname);
-
-			// Make sure that the fake constructor doesn't call back to this constructor
 			userConstruction = true;
-			var instance = new (FakeClass)();
-			return instance;
+			return new (FakeClass)();
 		}
-		// Else do nothing. This will be reached by ES5-style classes doing
-		// HTMLElement.call() during initialization
 		browserConstruction = false;
 	};
-	// By setting the patched HTMLElement's prototype property to the native
-	// HTMLElement's prototype we make sure that:
-	//     document.createElement('a') instanceof HTMLElement
-	// works because instanceof uses HTMLElement.prototype, which is on the
-	// ptototype chain of built-in elements.
 	window.HTMLElement.prototype = NativeHTMLElement.prototype;
 
 	var define = function (tagname, elementClass) {
 		var elementProto = elementClass.prototype;
-		var StandInElement = class extends NativeHTMLElement {
-			constructor() {
-				// Call the native HTMLElement constructor, this gives us the
-				// under-construction instance as `this`:
-				super();
-
-				// The prototype will be wrong up because the browser used our fake
-				// class, so fix it:
-				Object.setPrototypeOf(this, elementProto);
-
-				if (!userConstruction) {
-					// Make sure that user-defined constructor bottom's out to a do-nothing
-					// HTMLElement() call
-					browserConstruction = true;
-					// Call the user-defined constructor on our instance:
-					elementClass.call(this);
-				}
-				userConstruction = false;
-			}
-		};
+		var StandInElement = getStandInElement(elementProto, elementClass);
 		var standInProto = StandInElement.prototype;
 		StandInElement.observedAttributes = elementClass.observedAttributes;
 		standInProto.connectedCallback = elementProto.connectedCallback;
@@ -113,7 +77,7 @@ function nativeShim() {
 		nativeDefine.call(window.customElements, tagname, StandInElement);
 	};
 
-	var get = function (tagname) { constructorByTagname.get(tagname); }
+	var get = function (tagname) { constructorByTagname.get(tagname); };
 
 	// Workaround for Safari bug where patching customElements can be lost, likely
 	// due to native wrapper garbage collection issue
