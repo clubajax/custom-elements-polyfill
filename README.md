@@ -17,12 +17,23 @@ In your app:
 ```jsx harmony
 import 'custom-elements-polyfill';
 ```
+### Usage without Babel
+
+If you are running native, untranspiled code, the native-shim should not be loaded. Before loading the polyfill, use:
+```jsx harmony
+window['no-native-shim'] = true;
+```
+
 ## How it Works
 
 There is a native-shim that Chrome uses so that custom elements will work with transpiled ES5. 
 The problem with this polyfill is it uses ES6 which IE can't parse.
 
 The result is that the offending ES6 code is stringified, and when in Chrome or Safari, eval'd. When in IE, ignored.
+
+## FAQ
+
+For a list of helpful tips, see [BaseComponent Readme](https://github.com/clubajax/BaseComponent#es6-faq)
 
 ## License
 
