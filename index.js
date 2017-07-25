@@ -1,93 +1,16 @@
 var supportsV1 = 'customElements' in window;
 var supportsPromise = 'Promise' in window;
-var fce = localStorage.getItem('force-custom-elements-shim');
-var fns = localStorage.getItem('force-native-shim');
-if(fns || fce){
-	if(fns){nativeShim();}
-	if(fce){customElements();}
-}else{
-	if(supportsV1){
+var nativeShimBase64 = "ZnVuY3Rpb24gbmF0aXZlU2hpbSgpeygoKT0+eyd1c2Ugc3RyaWN0JztpZighd2luZG93LmN1c3RvbUVsZW1lbnRzKXJldHVybjtjb25zdCBhPXdpbmRvdy5IVE1MRWxlbWVudCxiPXdpbmRvdy5jdXN0b21FbGVtZW50cy5kZWZpbmUsYz13aW5kb3cuY3VzdG9tRWxlbWVudHMuZ2V0LGQ9bmV3IE1hcCxlPW5ldyBNYXA7bGV0IGY9ITEsZz0hMTt3aW5kb3cuSFRNTEVsZW1lbnQ9ZnVuY3Rpb24oKXtpZighZil7Y29uc3Qgaj1kLmdldCh0aGlzLmNvbnN0cnVjdG9yKSxrPWMuY2FsbCh3aW5kb3cuY3VzdG9tRWxlbWVudHMsaik7Zz0hMDtjb25zdCBsPW5ldyBrO3JldHVybiBsfWY9ITE7fSx3aW5kb3cuSFRNTEVsZW1lbnQucHJvdG90eXBlPWEucHJvdG90eXBlO09iamVjdC5kZWZpbmVQcm9wZXJ0eSh3aW5kb3csJ2N1c3RvbUVsZW1lbnRzJyx7dmFsdWU6d2luZG93LmN1c3RvbUVsZW1lbnRzLGNvbmZpZ3VyYWJsZTohMCx3cml0YWJsZTohMH0pLE9iamVjdC5kZWZpbmVQcm9wZXJ0eSh3aW5kb3cuY3VzdG9tRWxlbWVudHMsJ2RlZmluZScse3ZhbHVlOihqLGspPT57Y29uc3QgbD1rLnByb3RvdHlwZSxtPWNsYXNzIGV4dGVuZHMgYXtjb25zdHJ1Y3Rvcigpe3N1cGVyKCksT2JqZWN0LnNldFByb3RvdHlwZU9mKHRoaXMsbCksZ3x8KGY9ITAsay5jYWxsKHRoaXMpKSxnPSExO319LG49bS5wcm90b3R5cGU7bS5vYnNlcnZlZEF0dHJpYnV0ZXM9ay5vYnNlcnZlZEF0dHJpYnV0ZXMsbi5jb25uZWN0ZWRDYWxsYmFjaz1sLmNvbm5lY3RlZENhbGxiYWNrLG4uZGlzY29ubmVjdGVkQ2FsbGJhY2s9bC5kaXNjb25uZWN0ZWRDYWxsYmFjayxuLmF0dHJpYnV0ZUNoYW5nZWRDYWxsYmFjaz1sLmF0dHJpYnV0ZUNoYW5nZWRDYWxsYmFjayxuLmFkb3B0ZWRDYWxsYmFjaz1sLmFkb3B0ZWRDYWxsYmFjayxkLnNldChrLGopLGUuc2V0KGosayksYi5jYWxsKHdpbmRvdy5jdXN0b21FbGVtZW50cyxqLG0pO30sY29uZmlndXJhYmxlOiEwLHdyaXRhYmxlOiEwfSksT2JqZWN0LmRlZmluZVByb3BlcnR5KHdpbmRvdy5jdXN0b21FbGVtZW50cywnZ2V0Jyx7dmFsdWU6KGopPT5lLmdldChqKSxjb25maWd1cmFibGU6ITAsd3JpdGFibGU6ITB9KTt9KSgpO30=";
+if(supportsV1){
+	if(!window['no-native-shim']) {
+		eval(window.atob(nativeShimBase64));
 		nativeShim();
-	}else{
-		customElements();
 	}
+}else{
+	customElements();
 }
 if (!supportsPromise) {
 	promisePolyfill();
-}
-
-/**
- * @license
- * Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
- */
-function nativeShim() {
-	'use strict';
-
-	var getStandInElement = function(elementProto, elementClass) {
-		eval(
-			'window.__getWCClass = function (elementProto, elementClass) {' +
-			'return class extends NativeHTMLElement {' +
-			'constructor() {' +
-			'super();' +
-			'Object.setPrototypeOf(this, elementProto);' +
-			'if (!userConstruction) {' +
-			'browserConstruction = true;' +
-			'elementClass.call(this);' +
-			'}' +
-			'userConstruction = false;' +
-			'}' +
-			'};' +
-			'}'
-		);
-		return window.__getWCClass(elementProto, elementClass);
-	};
-
-	var NativeHTMLElement = window.HTMLElement;
-	var nativeDefine = window.customElements.define;
-	var nativeGet = window.customElements.get;
-	var tagnameByConstructor = new Map();
-	var constructorByTagname = new Map();
-	var browserConstruction = false;
-	var userConstruction = false;
-
-	window.HTMLElement = function() {
-		if (!browserConstruction) {
-			var tagname = tagnameByConstructor.get(this.constructor);
-			var FakeClass = nativeGet.call(window.customElements, tagname);
-			userConstruction = true;
-			return new (FakeClass)();
-		}
-		browserConstruction = false;
-	};
-	window.HTMLElement.prototype = NativeHTMLElement.prototype;
-
-	var define = function (tagname, elementClass) {
-		var elementProto = elementClass.prototype;
-		var StandInElement = getStandInElement(elementProto, elementClass);
-		var standInProto = StandInElement.prototype;
-		StandInElement.observedAttributes = elementClass.observedAttributes;
-		standInProto.connectedCallback = elementProto.connectedCallback;
-		standInProto.disconnectedCallback = elementProto.disconnectedCallback;
-		standInProto.attributeChangedCallback = elementProto.attributeChangedCallback;
-		standInProto.adoptedCallback = elementProto.adoptedCallback;
-
-		tagnameByConstructor.set(elementClass, tagname);
-		constructorByTagname.set(tagname, elementClass);
-		nativeDefine.call(window.customElements, tagname, StandInElement);
-	};
-
-	var get = function (tagname) { constructorByTagname.get(tagname); };
-
-	// Workaround for Safari bug where patching customElements can be lost, likely
-	// due to native wrapper garbage collection issue
-	Object.defineProperty(window, 'customElements',
-		{value: window.customElements, configurable: true, writable: true});
-	Object.defineProperty(window.customElements, 'define',
-		{value: define, configurable: true, writable: true});
-	Object.defineProperty(window.customElements, 'get',
-		{value: get, configurable: true, writable: true});
-
 }
 
 function customElements() {
@@ -120,6 +43,8 @@ pa(b,Element.prototype,{i:ha,append:ia});sa(b)};
 var Z=window.customElements;if(!Z||Z.forcePolyfill||"function"!=typeof Z.define||"function"!=typeof Z.get){var Y=new r;oa();qa();ra();ta();document.__CE_hasRegistry=!0;var ua=new E(Y);Object.defineProperty(window,"customElements",{configurable:!0,enumerable:!0,value:ua})};
 }).call(self);
 }
+// @license Polymer Project Authors. http://polymer.github.io/LICENSE.txt
+
 
 function promisePolyfill () {
 // https://github.com/taylorhakes/promise-polyfill/blob/master/promise.js
