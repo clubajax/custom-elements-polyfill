@@ -1,6 +1,6 @@
 {
   "name": "custom-elements-polyfill",
-  "version": "0.5.0",
+  "version": "0.7.1",
   "description": "Polyfill with built-in detection",
   "main": "index.js",
   "scripts": {
