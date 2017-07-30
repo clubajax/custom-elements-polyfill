@@ -4,10 +4,9 @@ This package uses the shims from [the webcomponents repo](https://github.com/web
 and combines them into a single polyfill that can be added to your project with npm.
 This makes it more Webpack friendly, since Webpack does not play well with the deprecated Bower.
 
-It also uses the small Promise from https://github.com/taylorhakes/promise-polyfill. If you 
-don't want to use this Promise, include yours before calling this package.
+Version v0.8 no longer includes the Promise that was in v0.7. It is reccomended to use 
+[this very small one.](https://github.com/taylorhakes/promise-polyfill)
 
-*Promise is deprecated and will be removed soon*
 
 ## Installation
 
