@@ -4,10 +4,6 @@ This package uses the shims from [the webcomponents repo](https://github.com/web
 and combines them into a single polyfill that can be added to your project with npm.
 This makes it more Webpack friendly, since Webpack does not play well with the deprecated Bower.
 
-Version v0.8 no longer includes the Promise that was in v0.7. It is reccomended to use 
-[this very small one.](https://github.com/taylorhakes/promise-polyfill)
-
-
 ## Installation
 
     npm install clubajax/custom-elements-polyfill --save
@@ -33,6 +29,9 @@ The result is that the offending ES6 code is stringified, and when in Chrome or 
 ## FAQ
 
 For a list of helpful tips, see [BaseComponent Readme](https://github.com/clubajax/BaseComponent#es6-faq)
+
+Version v0.8 no longer includes the Promise that was in v0.7. It is reccomended to use 
+[this very small one.](https://github.com/taylorhakes/promise-polyfill)
 
 ## License
 
