@@ -20,7 +20,7 @@ The solution is the offending ES6 code is stringified, and when in Chrome or Saf
     
 In your app:
 ```jsx harmony
-import 'custom-elements-polyfill';
+import '@clubajax/custom-elements-polyfill';
 ```
 
 It can also be loaded in a script, if you are not using build tools.
@@ -41,12 +41,6 @@ window['no-native-shim'] = true;
 
 #### force-ce-shim
 If you would like to load the custom-elements shim under any circumstances:
-```jsx harmony
-window['force-ce-shim'] = true;
-```
-
-#### force-no-ce-shim
-If you would like no shims to load:
 ```jsx harmony
 window['force-ce-shim'] = true;
 ```
