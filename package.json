@@ -1,7 +1,7 @@
 {
-  "name": "custom-elements-polyfill",
+  "name": "@clubajax/custom-elements-polyfill",
   "version": "0.8.2",
-	"author": "clubajax",
+  "author": "clubajax",
   "description": "Polyfill with built-in detection",
   "main": "index.js",
   "scripts": {
@@ -18,10 +18,14 @@
     "polyfill",
     "shim"
   ],
-
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/clubajax/custom-elements-polyfill/issues"
   },
-  "homepage": "https://github.com/clubajax/custom-elements-polyfill#readme"
+  "homepage": "https://github.com/clubajax/custom-elements-polyfill#readme",
+  "dependencies": {
+    "grunt": "^1.0.1",
+    "uglify": "^0.1.5"
+  },
+  "devDependencies": {}
 }
