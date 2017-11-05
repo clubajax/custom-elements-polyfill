@@ -34,9 +34,21 @@ Without switches, the behavior is:
 
 #### no-native-shim
 
-Good for developing with Chrome. If you are running native, untranspiled code, the native-shim should not be loaded. Before loading the polyfill, use:
+Good for developing with Chrome. If you are running native, untranspiled code, the native-shim should not be loaded. 
+Before loading the polyfill, use:
 ```jsx harmony
 window['no-native-shim'] = true;
+```
+
+#### webpack usage
+
+Webpack has the ability to add [global constants](https://webpack.js.org/plugins/define-plugin/); similar to a window
+global, but only accessible within your app (and not to window). You can set the `NO_NATIVE_SHIM` constant as follows:
+
+```jsx harmony
+const define = new webpack.DefinePlugin({
+	NO_NATIVE_SHIM: JSON.stringify(options.chromeOnly)
+});
 ```
 
 #### force-ce-shim
