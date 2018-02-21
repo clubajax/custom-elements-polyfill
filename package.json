@@ -1,6 +1,6 @@
 {
   "name": "@clubajax/custom-elements-polyfill",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "author": "clubajax",
   "description": "Polyfill with built-in detection",
   "main": "index.js",
