@@ -1,6 +1,6 @@
 {
   "name": "@clubajax/custom-elements-polyfill",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "author": "clubajax",
   "description": "Polyfill with built-in detection",
   "main": "index.js",
@@ -23,9 +23,6 @@
     "url": "https://github.com/clubajax/custom-elements-polyfill/issues"
   },
   "homepage": "https://github.com/clubajax/custom-elements-polyfill#readme",
-  "dependencies": {
-    "grunt": "^1.0.1",
-    "uglify": "^0.1.5"
-  },
+  "dependencies": {},
   "devDependencies": {}
 }
